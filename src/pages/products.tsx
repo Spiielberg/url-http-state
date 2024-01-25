@@ -13,17 +13,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { generateRandomProducts } from '@/data/products'
+import { getProducts } from '@/data/products'
+import { useSearchParams } from 'react-router-dom'
 
-export const App = () => {
+export const Products = () => {
+  const [searchParams] = useSearchParams()
+
+  const id = searchParams.get('id')
+  const name = searchParams.get('name')
+
   const {
     data: products,
     isError,
     isLoading,
   } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => generateRandomProducts(10),
-    refetchOnWindowFocus: false,
+    queryKey: ['products', id, name],
+    queryFn: () => getProducts({ id, name }),
   })
 
   return (
@@ -55,7 +60,7 @@ export const App = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products ? (
+            {products && products?.length > 0 ? (
               products?.map((product, index) => (
                 <TableRow key={index}>
                   <TableCell>{product.id}</TableCell>
@@ -80,7 +85,13 @@ export const App = () => {
                   Failed to load products
                 </TableCell>
               </TableRow>
-            ) : null}
+            ) : (
+              <TableRow>
+                <TableCell colSpan={3} align="center">
+                  No products found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
